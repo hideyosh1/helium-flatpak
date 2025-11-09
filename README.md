@@ -5,16 +5,18 @@ from the official [GitHub releases](https://github.com/imputnet/helium-linux/rel
 
 ## Build and Install
 
+You can build and install the Flatpak locally:
+
 ```bash
 flatpak-builder --user --install --force-clean build-dir computer.helium.Helium.yml
 flatpak run computer.helium.Helium
 ```
 
-## Updating
+## Install from repo
+Alternatively, you can install Helium directly from the Flatpak repository:
 
-To update to a newer release:
-1. Update the manifest via [External Data Checker](https://github.com/flathub-infra/flatpak-external-data-checker).
 ```bash
-flatpak run org.flathub.flatpak-external-data-checker --update computer.helium.Helium.yml
+flatpak remote-add --if-not-exists --user --no-gpg-verify helium-repo https://shyvortex.github.io/helium-flatpak/
+flatpak install helium-repo computer.helium.Helium
+flatpak run computer.helium.Helium
 ```
-2. Rebuild with `flatpak-builder --install`.
