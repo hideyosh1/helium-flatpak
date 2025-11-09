@@ -15,7 +15,7 @@ jobs:
       - name: Install Flatpak tools
         run: |
           sudo apt update
-          sudo apt install -y flatpak flatpak-builder python3-flatpak external-data-checker
+          sudo apt install -y flatpak flatpak-builder
 
       - name: Build Flatpak
         run: |
