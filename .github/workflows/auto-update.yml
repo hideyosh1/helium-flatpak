@@ -29,10 +29,18 @@ jobs:
       - name: Check if version was updated
         id: check_diff
         run: |
-          if git diff --quiet HEAD~1 HEAD -- computer.helium.Helium.yml; then
-            echo "changed=false" >> "$GITHUB_OUTPUT"
+          # Check if version.txt exists and extract version
+          if [ -f version.txt ]; then
+            CURRENT=$(cat version.txt | awk '{print $2}')
+            LATEST=$(grep -Po 'helium-[0-9]+\.[0-9]+\.[0-9]+(\.[0-9]+)?' computer.helium.Helium.yml 
+                | head -n1 | grep -Po '[0-9]+\.[0-9]+\.[0-9]+(\.[0-9]+)?')
+            if [ "$CURRENT" != "$LATEST" ]; then
+              echo "changed=true" >> "$GITHUB_OUTPUT"
+            else
+              echo "changed=false" >> "$GITHUB_OUTPUT"
+            fi
           else
-            echo "changed=true" >> "$GITHUB_OUTPUT"
+            echo "changed=false" >> "$GITHUB_OUTPUT"
           fi
 
       - name: Create new tag and release
