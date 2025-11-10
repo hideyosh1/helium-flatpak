@@ -1,6 +1,6 @@
 app-id: computer.helium.Helium
 runtime: org.freedesktop.Platform
-runtime-version: "0.6.4.1"
+runtime-version: "25.08"
 sdk: org.freedesktop.Sdk
 command: helium
 
