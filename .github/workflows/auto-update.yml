@@ -1,0 +1,55 @@
+name: Helium Auto Update
+
+on:
+  schedule:
+    - cron: "0 7 * * *" # runs every day at 07:00 UTC
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  update-helium:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Set up Git
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+      - name: Run update script
+        run: bash ./grab_latest.sh
+
+      - name: Check if version was updated
+        id: check_diff
+        run: |
+          if git diff --quiet HEAD~1 HEAD -- computer.helium.Helium.yml; then
+            echo "changed=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "changed=true" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Create new tag and release
+        if: steps.check_diff.outputs.changed == 'true'
+        env:
+          GITHUB_TOKEN: ${{ secrets.PAT_GITHUB }}
+        run: |
+          # Extract version from the YAML file
+          VERSION=$(grep -m1 'version:' computer.helium.Helium.yml | grep -oP '"\K[^"]+')
+          echo "Detected new version: $VERSION"
+
+          # Create Git tag
+          git tag -a "v$VERSION" -m "Helium $VERSION"
+          git push origin "v$VERSION"
+
+          # Create GitHub release
+          gh release create "v$VERSION" \
+            --title "$VERSION" \
+            --notes "Automated update to Helium version $VERSION" \
+            --generate-notes
