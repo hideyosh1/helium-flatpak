@@ -4,16 +4,23 @@ set -euo pipefail
 MANIFEST_FILE="computer.helium.Helium.yml"
 REPO_URL="https://github.com/imputnet/helium-linux/releases/download"
 
-# --- Fetch latest Helium release tag ---
-LATEST_VERSION=$(curl -s https://api.github.com/repos/imputnet/helium-linux/releases/latest \
-  | grep -Po '"tag_name": *"\K[0-9]+\.[0-9]+\.[0-9]+(\.[0-9]+)?(?=")')
+# --- Fetch latest Helium release ---
+LATEST_JSON=$(curl -s https://api.github.com/repos/imputnet/helium-linux/releases \
+  | jq -c '[.[] | select(.tag_name != null)] | sort_by(.created_at) | last')
 
-if [[ -z "$LATEST_VERSION" ]]; then
+LATEST_VERSION=$(echo "$LATEST_JSON" | jq -r '.tag_name')
+IS_PRERELEASE=$(echo "$LATEST_JSON" | jq -r '.prerelease')
+
+if [[ -z "$LATEST_VERSION" || "$LATEST_VERSION" == "null" ]]; then
   echo "   Failed to fetch latest version tag from GitHub."
   exit 1
 fi
 
-echo "   Latest Helium version: $LATEST_VERSION"
+if [[ "$IS_PRERELEASE" == "true" ]]; then
+  echo "   Latest release is a prerelease: $LATEST_VERSION"
+else
+  echo "   Latest release is a stable release: $LATEST_VERSION"
+fi
 
 # --- Detect OS for sed compatibility ---
 if [[ "$OSTYPE" == "darwin"* ]]; then
@@ -29,7 +36,8 @@ CURRENT_VERSION=$(grep -Po 'helium-[0-9]+\.[0-9]+\.[0-9]+(\.[0-9]+)?' "$MANIFEST
 
 # --- Create temp file with version number ---
 touch version.txt
-echo "version: $CURRENT_VERSION" > version.txt
+echo "version: $CURRENT_VERSION" >> version.txt
+echo "prerelease: $IS_PRERELEASE" >> version.txt
 
 if [[ "$CURRENT_VERSION" == "$LATEST_VERSION" ]]; then
   echo "   Manifest already up to date ($CURRENT_VERSION). Checking SHA256..."

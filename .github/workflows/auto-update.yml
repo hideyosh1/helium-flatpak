@@ -29,17 +29,10 @@ jobs:
       - name: Check if version was updated
         id: check_diff
         run: |
-          # Check if version.txt exists and extract version
-          if [ -f version.txt ]; then
-            CURRENT=$(cat version.txt | awk '{print $2}')
-            LATEST=$(grep -Po 'helium-[0-9]+\.[0-9]+\.[0-9]+(\.[0-9]+)?' computer.helium.Helium.yml | head -n1 | grep -Po '[0-9]+\.[0-9]+\.[0-9]+(\.[0-9]+)?')
-            if [ "$CURRENT" != "$LATEST" ]; then
-              echo "changed=true" >> "$GITHUB_OUTPUT"
-            else
-              echo "changed=false" >> "$GITHUB_OUTPUT"
-            fi
-          else
+          if git diff --quiet HEAD~1 HEAD -- computer.helium.Helium.yml; then
             echo "changed=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "changed=true" >> "$GITHUB_OUTPUT"
           fi
 
       - name: Create new tag and release
@@ -47,16 +40,26 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          # Extract version from temp file
+          # Extract version and prerelease info
           VERSION=$(grep -m1 'version:' version.txt | awk '{print $2}')
+          IS_PRERELEASE=$(grep -m1 'prerelease:' version.txt | awk '{print $2}')
+
           echo "Detected new version: $VERSION"
+          echo "Is prerelease: $IS_PRERELEASE"
 
           # Create Git tag
           git tag -a "v$VERSION" -m "Helium $VERSION"
           git push origin "v$VERSION"
 
+          # Prepare prerelease flag for gh release
+          PRERELEASE_FLAG=""
+          if [ "$IS_PRERELEASE" = "true" ]; then
+            PRERELEASE_FLAG="--prerelease"
+          fi
+
           # Create GitHub release
           gh release create "v$VERSION" \
             --title "$VERSION" \
             --notes "Automated update to Helium version $VERSION" \
-            --generate-notes
+            --generate-notes \
+            $PRERELEASE_FLAG
