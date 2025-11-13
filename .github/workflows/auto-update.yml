@@ -48,23 +48,33 @@ jobs:
           # Extract version and prerelease info
           VERSION=$(grep -m1 'version:' version.txt | awk '{print $2}')
           IS_PRERELEASE=$(grep -m1 'prerelease:' version.txt | awk '{print $2}')
-
           echo "Detected new version: $VERSION"
           echo "Is prerelease: $IS_PRERELEASE"
 
-          # Create Git tag
+          # Check if tag already exists remotely
+          if git ls-remote --exit-code --tags origin "v$VERSION" >/dev/null 2>&1; then
+            echo "Tag v$VERSION already exists on remote, skipping release."
+            exit 0
+          fi
+
+          # Create Git tag and push
           git tag -a "v$VERSION" -m "Helium $VERSION"
           git push origin "v$VERSION"
 
-          # Prepare prerelease flag for gh release
-          PRERELEASE_FLAG=""
-          if [ "$IS_PRERELEASE" = "true" ]; then
-            PRERELEASE_FLAG="--prerelease"
+          # Create GitHub release (pre or normal)
+          if [[ "$IS_PRERELEASE" == "true" ]]; then
+            echo "Creating prerelease for v$VERSION..."
+            gh release create "v$VERSION" \
+              --title "$VERSION" \
+              --notes "Automated update to prerelease Helium version $VERSION" \
+              --generate-notes \
+              --prerelease
+          else
+            echo "Creating stable release for v$VERSION..."
+            gh release create "v$VERSION" \
+              --title "$VERSION" \
+              --notes "Automated update to Helium version $VERSION" \
+              --generate-notes
           fi
 
-          # Create GitHub release
-          gh release create "v$VERSION" \
-            --title "$VERSION" \
-            --notes "Automated update to Helium version $VERSION" \
-            --generate-notes \
-            $PRERELEASE_FLAG
+          echo "Release process complete."
