@@ -3,10 +3,18 @@ set -euo pipefail
 
 MANIFEST_FILE="computer.helium.Helium.yml"
 REPO_URL="https://github.com/imputnet/helium-linux/releases/download"
+ALLOW_PRERELEASE=$(grep -m1 'allow-prerelease:' fetch.config.yml | awk '{print $2}')
+
+# --- Set prerelease behaviour ---
+if [[ "$ALLOW_PRERELEASE" == "true" ]]; then
+    FILTER=".prerelease == true or .prerelease == false"
+else
+    FILTER=".prerelease == false"
+fi
 
 # --- Fetch latest Helium release ---
 LATEST_JSON=$(curl -s https://api.github.com/repos/imputnet/helium-linux/releases \
-  | jq -c '[.[] | select(.tag_name != null)] | sort_by(.created_at) | last')
+  | jq -c "[.[] | select(.tag_name != null and ($FILTER))] | sort_by(.created_at) | last")
 
 LATEST_VERSION=$(echo "$LATEST_JSON" | jq -r '.tag_name')
 IS_PRERELEASE=$(echo "$LATEST_JSON" | jq -r '.prerelease')
