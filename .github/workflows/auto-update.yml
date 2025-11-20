@@ -1,25 +1,18 @@
 name: Helium Auto Update
 
 on:
-  workflow_run:
-      workflows: ["Build and Publish Flatpak"]
-      types:
-        - completed
   schedule:
     - cron: "0 7 * * *" # runs every day at 07:00 UTC
   workflow_dispatch:
+  push:
+    branches: [main]
 
 permissions:
   contents: write
 
 jobs:
   update-helium:
-    if: >
-      github.event_name == 'schedule' ||
-      github.event_name == 'workflow_dispatch' ||
-      (github.event_name == 'workflow_run' && github.event.workflow_run.conclusion == 'success')
     runs-on: ubuntu-latest
-
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4

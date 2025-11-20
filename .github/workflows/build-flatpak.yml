@@ -1,9 +1,13 @@
 name: Build and Publish Flatpak
 
 on:
+  workflow_run:
+    workflows: ["Helium Auto Update"]
+    types:
+      - completed
   workflow_dispatch:
   push:
-    branches: [ main ]
+    branches: [main]
 
 jobs:
   build:
