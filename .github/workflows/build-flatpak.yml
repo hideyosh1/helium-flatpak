@@ -11,6 +11,9 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
       - name: Check for recent commits
         id: check_commits
         run: |
@@ -23,10 +26,6 @@ jobs:
           else
             echo "recent_commit=false" >> $GITHUB_OUTPUT
           fi
-
-      - name: Checkout repo
-        if: steps.check_commits.outputs.recent_commit == 'true'
-        uses: actions/checkout@v4
 
       - name: Install Flatpak tools
         if: steps.check_commits.outputs.recent_commit == 'true'
