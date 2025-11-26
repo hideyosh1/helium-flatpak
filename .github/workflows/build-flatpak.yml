@@ -28,7 +28,21 @@ jobs:
         run: |
           flatpak-builder --repo=repo build-dir computer.helium.Helium.yml
 
+      - name: Check for recent commits
+        id: check_commits
+        run: |
+          last_commit_time=$(git log -1 --format=%ct)
+          current_time=$(date +%s)
+          diff=$((current_time - last_commit_time))
+          echo "Time since last commit: $diff seconds"
+          if [ $diff -le 300 ]; then
+            echo "recent_commit=true" >> $GITHUB_OUTPUT
+          else
+            echo "recent_commit=false" >> $GITHUB_OUTPUT
+          fi
+
       - name: Upload repo to gh-pages
+        if: steps.check_commits.outputs.recent_commit == 'true'
         uses: peaceiris/actions-gh-pages@v4
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
