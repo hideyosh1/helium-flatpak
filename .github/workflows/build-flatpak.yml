@@ -11,23 +11,6 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout repo
-        uses: actions/checkout@v4
-
-      - name: Install Flatpak tools
-        run: |
-          sudo apt update
-          sudo apt install -y flatpak flatpak-builder
-
-      - name: Install Freedesktop SDK
-        run: |
-          sudo flatpak remote-add --if-not-exists flathub https://flathub.org/repo/flathub.flatpakrepo
-          sudo flatpak install -y flathub org.freedesktop.Sdk//25.08 org.freedesktop.Platform//25.08
-
-      - name: Build Flatpak
-        run: |
-          flatpak-builder --repo=repo build-dir computer.helium.Helium.yml
-
       - name: Check for recent commits
         id: check_commits
         run: |
@@ -40,6 +23,27 @@ jobs:
           else
             echo "recent_commit=false" >> $GITHUB_OUTPUT
           fi
+
+      - name: Checkout repo
+        if: steps.check_commits.outputs.recent_commit == 'true'
+        uses: actions/checkout@v4
+
+      - name: Install Flatpak tools
+        if: steps.check_commits.outputs.recent_commit == 'true'
+        run: |
+          sudo apt update
+          sudo apt install -y flatpak flatpak-builder
+
+      - name: Install Freedesktop SDK
+        if: steps.check_commits.outputs.recent_commit == 'true'
+        run: |
+          sudo flatpak remote-add --if-not-exists flathub https://flathub.org/repo/flathub.flatpakrepo
+          sudo flatpak install -y flathub org.freedesktop.Sdk//25.08 org.freedesktop.Platform//25.08
+
+      - name: Build Flatpak
+        if: steps.check_commits.outputs.recent_commit == 'true'
+        run: |
+          flatpak-builder --repo=repo build-dir computer.helium.Helium.yml
 
       - name: Upload repo to gh-pages
         if: steps.check_commits.outputs.recent_commit == 'true'
