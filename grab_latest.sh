@@ -55,6 +55,9 @@ else
   $SED_INPLACE -E "s|(helium-linux/releases/download/)$CURRENT_VERSION|\1$LATEST_VERSION|g" "$MANIFEST_FILE"
   $SED_INPLACE -E "s|(helium-$CURRENT_VERSION-x86_64_linux)|helium-$LATEST_VERSION-x86_64_linux|g" "$MANIFEST_FILE"
   $SED_INPLACE -E "s|(helium-$CURRENT_VERSION)|helium-$LATEST_VERSION|g" "$MANIFEST_FILE"
+  # --- Update version number ---
+  echo "version: $LATEST_VERSION" > version.txt
+  echo "prerelease: $IS_PRERELEASE" >> version.txt
 fi
 
 # --- Compute new SHA256 ---
@@ -76,12 +79,13 @@ echo "   New SHA256: $NEW_SHA256"
 # --- Replace sha256 field in manifest ---
 $SED_INPLACE -E "s/sha256: [a-f0-9]+/sha256: $NEW_SHA256/" "$MANIFEST_FILE"
 
-# --- Commit and push if changed ---
+# --- Skip if not changed ---
 if git diff --quiet -- "$MANIFEST_FILE"; then
   echo "   No effective change detected, skipping commit."
   exit 0
 fi
 
+# --- Commit and push if changed ---
 git add "$MANIFEST_FILE"
 git commit -m "update: helium ${LATEST_VERSION}"
 git push origin main
