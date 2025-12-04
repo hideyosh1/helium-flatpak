@@ -47,6 +47,7 @@ finish-args:
 
 modules:
   - name: helium
+    metadata: computer.helium.Helium.metainfo.xml
     buildsystem: simple
     build-commands:
       - tar -xvf helium-linux-x64.tar.gz
@@ -75,7 +76,8 @@ modules:
         url: https://github.com/imputnet/helium-linux/releases/download/0.6.9.1/helium-0.6.9.1-x86_64_linux.tar.xz
         sha256: 0cb709084084e7259cc19b91c0d26cdeafacaab65b4dba2e185e5b0d32056163
         dest-filename: helium-linux-x64.tar.gz
-
+      - type: file
+        path: computer.helium.Helium.metainfo.xml
       - type: file
         path: computer.helium.Helium.desktop
 
