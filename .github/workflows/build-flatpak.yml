@@ -42,7 +42,7 @@ jobs:
       - name: Build Flatpak
         if: steps.check_commits.outputs.recent_commit == 'true'
         run: |
-          flatpak-builder --repo=repo build-dir computer.helium.Helium.yml
+          flatpak-builder --repo=repo build-dir com.imputnet.Helium.yml
 
       - name: Upload repo to gh-pages
         if: steps.check_commits.outputs.recent_commit == 'true'

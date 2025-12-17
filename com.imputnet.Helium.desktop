@@ -99,7 +99,7 @@ Comment[vi]=Trình duyệt web riêng tư, nhanh và trung thực
 Comment[zh_CN]=私密、快速、诚实的网页浏览器
 Comment[zh_TW]=私密、快速且誠實的網頁瀏覽器
 Exec=helium %u
-Icon=computer.helium.Helium
+Icon=com.imputnet.Helium
 Categories=Network;WebBrowser;
 Keywords=web;browser;internet;surf;helium;
 Terminal=false
@@ -112,7 +112,7 @@ X-GNOME-UsesNotifications=true
 X-GNOME-SingleWindow=true
 X-Sandboxed=true
 X-Purism-FormFactor=Workstation
-X-Flatpak=computer.helium.Helium
+X-Flatpak=com.imputnet.Helium
 
 [Desktop Action NewWindow]
 Name=New Window

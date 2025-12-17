@@ -30,7 +30,7 @@ jobs:
       - name: Check if version was updated
         id: check_diff
         run: |
-          if git diff --quiet HEAD~1 HEAD -- computer.helium.Helium.yml; then
+          if git diff --quiet HEAD~1 HEAD -- com.imputnet.Helium.yml; then
             echo "changed=false" >> "$GITHUB_OUTPUT"
           else
             echo "changed=true" >> "$GITHUB_OUTPUT"

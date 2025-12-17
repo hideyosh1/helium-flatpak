@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-MANIFEST_FILE="computer.helium.Helium.yml"
+MANIFEST_FILE="com.imputnet.Helium.yml"
 REPO_URL="https://github.com/imputnet/helium-linux/releases/download"
 ALLOW_PRERELEASE=$(grep -m1 'allow-prerelease:' fetch.config.yml | awk '{print $2}')
 
