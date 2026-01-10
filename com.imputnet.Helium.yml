@@ -24,6 +24,18 @@ finish-args:
   - --device=all
   - --socket=pulseaudio
   - --allow=bluetooth
+  # D-bus names to allow inhibiting sleep, enable media controls, and other stuff
+  # Based on com.Google.Chrome flatpak
+  - --system-talk-name=org.bluez
+  - --system-talk-name=org.freedesktop.UPower
+  - --talk-name=org.freedesktop.FileManager1
+  - --talk-name=org.freedesktop.Notifications
+  - --talk-name=org.freedesktop.ScreenSaver
+  - --talk-name=org.freedesktop.secrets
+  - --talk-name=org.gnome.SessionManager
+  - --talk-name=org.kde.StatusNotifierWatcher
+  - --system-talk-name=org.freedesktop.Avahi
+  - --own-name=org.mpris.MediaPlayer2.chromium.*
   - --filesystem=xdg-download
   - --filesystem=xdg-pictures
   - --filesystem=xdg-videos
