@@ -21,6 +21,7 @@ finish-args:
   - --socket=cups # allow printing
   - --socket=pcsc
   - --device=dri
+  - --device=all
   - --socket=pulseaudio
   - --allow=bluetooth
   - --filesystem=xdg-download
