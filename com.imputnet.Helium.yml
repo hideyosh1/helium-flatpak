@@ -75,14 +75,18 @@ modules:
 
       - install -Dm644 com.imputnet.Helium.desktop /app/share/applications/com.imputnet.Helium.desktop
 
-      - mkdir -p icons/256x256 icons/128x128 icons/64x64
+      - mkdir -p icons/512x512 icons/256x256 icons/128x128 icons/64x64 icons/32x32
+      - cp com.imputnet.Helium.png icons/512x512/
       - cp com.imputnet.Helium.png icons/256x256/
       - cp com.imputnet.Helium.png icons/128x128/
       - cp com.imputnet.Helium.png icons/64x64/
+      - cp com.imputnet.Helium.png icons/32x32/
 
+      - install -Dm644 icons/512x512/com.imputnet.Helium.png /app/share/icons/hicolor/512x512/apps/com.imputnet.Helium.png  
       - install -Dm644 icons/256x256/com.imputnet.Helium.png /app/share/icons/hicolor/256x256/apps/com.imputnet.Helium.png
       - install -Dm644 icons/128x128/com.imputnet.Helium.png /app/share/icons/hicolor/128x128/apps/com.imputnet.Helium.png
       - install -Dm644 icons/64x64/com.imputnet.Helium.png /app/share/icons/hicolor/64x64/apps/com.imputnet.Helium.png
+      - install -Dm644 icons/32x32/com.imputnet.Helium.png /app/share/icons/hicolor/32x32/apps/com.imputnet.Helium.png
 
     sources:
       - type: file
@@ -95,8 +99,12 @@ modules:
         path: com.imputnet.Helium.desktop
 
       - type: file
-        path: icons/128x128/com.imputnet.Helium.png
+        path: icons/32x32/com.imputnet.Helium.png
       - type: file
         path: icons/64x64/com.imputnet.Helium.png
       - type: file
+        path: icons/128x128/com.imputnet.Helium.png
+      - type: file
         path: icons/256x256/com.imputnet.Helium.png
+      - type: file
+        path: icons/512x512/com.imputnet.Helium.png
