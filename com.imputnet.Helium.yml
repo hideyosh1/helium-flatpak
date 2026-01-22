@@ -67,7 +67,7 @@ modules:
       - mkdir -p /app/lib/helium
       - mkdir -p /app/bin
       - cp -r helium-0.8.3.1-x86_64_linux/* /app/lib/helium
-      - install -Dm755 helium-0.8.3.1-x86_64_linux/chrome /app/lib/helium/helium.real
+      - install -Dm755 helium-0.8.3.1-x86_64_linux/helium /app/lib/helium/helium.real
 
       - echo '#!/bin/sh' > /app/bin/helium
       - echo 'exec /app/lib/helium/helium.real --no-sandbox --test-type "$@"' >> /app/bin/helium
