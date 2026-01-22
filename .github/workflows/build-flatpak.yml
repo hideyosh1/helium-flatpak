@@ -16,6 +16,7 @@ jobs:
 
       - name: Check for recent commits
         id: check_commits
+        if: github.event_name != 'workflow_dispatch'
         run: |
           last_commit_time=$(git log -1 --format=%ct)
           current_time=$(date +%s)
@@ -28,24 +29,24 @@ jobs:
           fi
 
       - name: Install Flatpak tools
-        if: steps.check_commits.outputs.recent_commit == 'true'
+        if: github.event_name == 'workflow_dispatch' || steps.check_commits.outputs.recent_commit == 'true'
         run: |
           sudo apt update
           sudo apt install -y flatpak flatpak-builder
 
       - name: Install Freedesktop SDK
-        if: steps.check_commits.outputs.recent_commit == 'true'
+        if: github.event_name != 'workflow_dispatch' || steps.check_commits.outputs.recent_commit == 'true'
         run: |
           sudo flatpak remote-add --if-not-exists flathub https://flathub.org/repo/flathub.flatpakrepo
           sudo flatpak install -y flathub org.freedesktop.Sdk//25.08 org.freedesktop.Platform//25.08
 
       - name: Build Flatpak
-        if: steps.check_commits.outputs.recent_commit == 'true'
+        if: github.event_name != 'workflow_dispatch' || steps.check_commits.outputs.recent_commit == 'true'
         run: |
           flatpak-builder --repo=repo build-dir com.imputnet.Helium.yml
 
       - name: Upload repo to gh-pages
-        if: steps.check_commits.outputs.recent_commit == 'true'
+        if: github.event_name != 'workflow_dispatch' || steps.check_commits.outputs.recent_commit == 'true'
         uses: peaceiris/actions-gh-pages@v4
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
