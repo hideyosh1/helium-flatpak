@@ -35,18 +35,18 @@ jobs:
           sudo apt install -y flatpak flatpak-builder
 
       - name: Install Freedesktop SDK
-        if: github.event_name != 'workflow_dispatch' || steps.check_commits.outputs.recent_commit == 'true'
+        if: github.event_name == 'workflow_dispatch' || steps.check_commits.outputs.recent_commit == 'true'
         run: |
           sudo flatpak remote-add --if-not-exists flathub https://flathub.org/repo/flathub.flatpakrepo
           sudo flatpak install -y flathub org.freedesktop.Sdk//25.08 org.freedesktop.Platform//25.08
 
       - name: Build Flatpak
-        if: github.event_name != 'workflow_dispatch' || steps.check_commits.outputs.recent_commit == 'true'
+        if: github.event_name == 'workflow_dispatch' || steps.check_commits.outputs.recent_commit == 'true'
         run: |
           flatpak-builder --repo=repo build-dir com.imputnet.Helium.yml
 
       - name: Upload repo to gh-pages
-        if: github.event_name != 'workflow_dispatch' || steps.check_commits.outputs.recent_commit == 'true'
+        if: github.event_name == 'workflow_dispatch' || steps.check_commits.outputs.recent_commit == 'true'
         uses: peaceiris/actions-gh-pages@v4
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
