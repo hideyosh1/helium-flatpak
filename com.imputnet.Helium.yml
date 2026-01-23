@@ -87,7 +87,7 @@ modules:
     sources:
       - type: file
         url: https://github.com/imputnet/helium-linux/releases/download/0.8.3.1/helium-0.8.3.1-x86_64_linux.tar.xz
-        sha256: 3dc480d040f47a0510c3716a7f120ec325cb2cc787d23c6f48607f9f76724446
+        sha256: 5957aa5fc15e3859dfcd90cf5aa75200af2a6ff08c28029502182571f5ffb026
         dest-filename: helium-linux-x64.tar.gz
       - type: file
         path: com.imputnet.Helium.xml
