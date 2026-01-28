@@ -94,7 +94,7 @@ modules:
         sha256: 5957aa5fc15e3859dfcd90cf5aa75200af2a6ff08c28029502182571f5ffb026
         dest-filename: helium-linux-x64.tar.gz
       - type: file
-        path: com.imputnet.Helium.xml
+        path: com.imputnet.Helium.metainfo.xml
       - type: file
         path: com.imputnet.Helium.desktop
 
