@@ -2,7 +2,7 @@
 set -euo pipefail
 
 MANIFEST_FILE="com.imputnet.Helium.yml"
-METADATA_FILE="com.imputnet.Helium.xml"
+METADATA_FILE="com.imputnet.Helium.metainfo.xml"
 REPO_URL="https://github.com/imputnet/helium-linux/releases/download"
 ALLOW_PRERELEASE=$(grep -m1 'allow-prerelease:' fetch.config.yml | awk '{print $2}')
 
@@ -58,8 +58,8 @@ else
   $SED_INPLACE -E "s|(helium-linux/releases/download/)$CURRENT_VERSION|\1$LATEST_VERSION|g" "$MANIFEST_FILE"
   $SED_INPLACE -E "s|(helium-$CURRENT_VERSION-x86_64_linux)|helium-$LATEST_VERSION-x86_64_linux|g" "$MANIFEST_FILE"
   $SED_INPLACE -E "s|(helium-$CURRENT_VERSION)|helium-$LATEST_VERSION|g" "$MANIFEST_FILE"
-  $SED_INPLACE -E "s|(<release version=\')$CURRENT_VERSION|\1$LATEST_VERSION|g" "$METADATA_FILE"
-  $SED_INPLACE -E "s|(<release date=')[0-9]{4}-[0-9]{2}-[0-9]{2}|\\1$CURRENT_DATE|g" "$METADATA_FILE"
+  $SED_INPLACE -E "s|(<release version=['\"])$CURRENT_VERSION|\1$LATEST_VERSION|g" "$METADATA_FILE"
+  $SED_INPLACE -E "s|(<release date=['\"])[0-9]{4}-[0-9]{2}-[0-9]{2}|\1$CURRENT_DATE|g" "$METADATA_FILE"
   # --- Update version number ---
   echo "version: $LATEST_VERSION" > version.txt
   echo "prerelease: $IS_PRERELEASE" >> version.txt
