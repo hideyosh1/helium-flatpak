@@ -20,12 +20,3 @@ flatpak remote-add --user --no-gpg-verify helium-repo https://shyvortex.github.i
 flatpak install helium-repo com.imputnet.Helium
 flatpak run com.imputnet.Helium
 ```
-
-## Troubleshooting
-
-### Cloudflare Verification
-Some of Helium's default flags are incompatible with Cloudflare's browser verification checks.  
-If you are unable to authenticate on sites using Cloudflare, you must disable these specific settings.  
-Navigate to `helium://flags`, then search for and disable the following flags:  
-
-<img width="814" height="225" alt="Screenshot 2025-12-19 103420" src="https://github.com/user-attachments/assets/0182667d-4214-4372-97d2-9ca68ff2e8f8" />
