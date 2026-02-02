@@ -91,7 +91,7 @@ if git diff --quiet -- "$MANIFEST_FILE"; then
 fi
 
 # --- Commit and push if changed ---
-git add "$MANIFEST_FILE"
+git add "$MANIFEST_FILE" "$METADATA_FILE"
 git commit -m "update: helium ${LATEST_VERSION}"
 git push origin main
 
