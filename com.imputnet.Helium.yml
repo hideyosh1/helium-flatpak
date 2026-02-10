@@ -40,7 +40,6 @@ finish-args:
   - --filesystem=xdg-pictures
   - --filesystem=xdg-videos
   - --filesystem=xdg-desktop
-  - --filesystem=/tmp
   - --persist=.pki
   - --env=LD_LIBRARY_PATH=/app/lib/helium:$LD_LIBRARY_PATH
   - --env=CHROME_DEVEL_SANDBOX_DISABLED=1
