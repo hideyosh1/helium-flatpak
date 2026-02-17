@@ -90,8 +90,13 @@ if git diff --quiet -- "$MANIFEST_FILE"; then
   exit 0
 fi
 
+# --- Update Flatpak repo ---
+rm -rf repo build-dir helium-*.flatpak
+flatpak-builder --repo=repo --force-clean build-dir com.imputnet.Helium.yml
+flatpak build-bundle repo helium-$LATEST_VERSION.flatpak com.imputnet.Helium
+
 # --- Commit and push if changed ---
-git add "$MANIFEST_FILE" "$METADATA_FILE"
+git add "$MANIFEST_FILE" "$METADATA_FILE" "helium-$LATEST_VERSION.flatpak"
 git commit -m "update: helium ${LATEST_VERSION}"
 git push origin main
 
