@@ -4,24 +4,49 @@ set -euo pipefail
 MANIFEST_FILE="com.imputnet.Helium.yml"
 METADATA_FILE="com.imputnet.Helium.metainfo.xml"
 REPO_URL="https://github.com/imputnet/helium-linux/releases/download"
-ALLOW_PRERELEASE=$(grep -m1 'allow-prerelease:' fetch.config.yml | awk '{print $2}')
 
-# --- Set prerelease behaviour ---
-if [[ "$ALLOW_PRERELEASE" == "true" ]]; then
-    FILTER=".prerelease == true or .prerelease == false"
+# Read config or default to false
+if [ -f "fetch.config.yml" ]; then
+    ALLOW_PRERELEASE=$(grep -m1 'allow-prerelease:' fetch.config.yml | awk '{print $2}')
 else
-    FILTER=".prerelease == false"
+    ALLOW_PRERELEASE="false"
 fi
 
-# --- Fetch latest Helium release ---
-LATEST_JSON=$(curl -s https://api.github.com/repos/imputnet/helium-linux/releases \
-  | jq -c "[.[] | select(.tag_name != null and ($FILTER))] | sort_by(.created_at) | last")
+echo "   Fetching releases from GitHub..."
+RELEASES_JSON=$(curl -s https://api.github.com/repos/imputnet/helium-linux/releases)
 
-LATEST_VERSION=$(echo "$LATEST_JSON" | jq -r '.tag_name')
-IS_PRERELEASE=$(echo "$LATEST_JSON" | jq -r '.prerelease')
+# --- Use Python instead of jq ---
+read -r LATEST_VERSION IS_PRERELEASE <<< $(echo "$RELEASES_JSON" | python3 -c "
+import sys, json
+
+try:
+    data = json.load(sys.stdin)
+    allow_pre = '${ALLOW_PRERELEASE}' == 'true'
+    
+    # Handle API errors or empty data
+    if not isinstance(data, list):
+        print('null false')
+        sys.exit(0)
+
+    # 1. Filter releases (Valid tag + Prerelease check)
+    candidates = [
+        r for r in data 
+        if r.get('tag_name') 
+        and (allow_pre or not r.get('prerelease', False))
+    ]
+
+    # 2. Sort by date (ISO strings sort correctly) and pick last
+    if candidates:
+        latest = sorted(candidates, key=lambda x: x.get('created_at', ''))[-1]
+        print(f\"{latest['tag_name']} {str(latest['prerelease']).lower()}\")
+    else:
+        print('null false')
+except Exception:
+    print('null false')
+")
 
 if [[ -z "$LATEST_VERSION" || "$LATEST_VERSION" == "null" ]]; then
-  echo "   Failed to fetch latest version tag from GitHub."
+  echo "   Error: Failed to fetch valid version tag from GitHub."
   exit 1
 fi
 
@@ -31,13 +56,6 @@ else
   echo "   Latest release is a stable release: $LATEST_VERSION"
 fi
 
-# --- Detect OS for sed compatibility ---
-if [[ "$OSTYPE" == "darwin"* ]]; then
-  SED_INPLACE="sed -i ''"
-else
-  SED_INPLACE="sed -i"
-fi
-
 # --- Extract current version from manifest ---
 CURRENT_VERSION=$(grep -Po 'helium-[0-9]+\.[0-9]+\.[0-9]+(\.[0-9]+)?' "$MANIFEST_FILE" \
   | head -n1 \
@@ -45,29 +63,39 @@ CURRENT_VERSION=$(grep -Po 'helium-[0-9]+\.[0-9]+\.[0-9]+(\.[0-9]+)?' "$MANIFEST
 
 CURRENT_DATE=$(date '+%Y-%m-%d')
 
-# --- Create temp file with version number ---
-touch version.txt
-echo "version: $CURRENT_VERSION" >> version.txt
+# Save info for the Workflow to read
+echo "version: $CURRENT_VERSION" > version.txt
 echo "prerelease: $IS_PRERELEASE" >> version.txt
 
 if [[ "$CURRENT_VERSION" == "$LATEST_VERSION" ]]; then
-  echo "   Manifest already up to date ($CURRENT_VERSION). Checking SHA256..."
+  echo "   Manifest is already up to date ($CURRENT_VERSION)."
+  # We exit successfully; the workflow will see no git diff and stop.
+  exit 0
 else
   echo "   Updating manifest from $CURRENT_VERSION → $LATEST_VERSION"
-  # --- Replace version strings ---
+  
+  # --- Setup sed for Linux/Mac ---
+  if [[ "$OSTYPE" == "darwin"* ]]; then
+    SED_INPLACE="sed -i ''"
+  else
+    SED_INPLACE="sed -i"
+  fi
+
+  # --- Update Manifest Files ---
   $SED_INPLACE -E "s|(helium-linux/releases/download/)$CURRENT_VERSION|\1$LATEST_VERSION|g" "$MANIFEST_FILE"
   $SED_INPLACE -E "s|(helium-$CURRENT_VERSION-x86_64_linux)|helium-$LATEST_VERSION-x86_64_linux|g" "$MANIFEST_FILE"
   $SED_INPLACE -E "s|(helium-$CURRENT_VERSION)|helium-$LATEST_VERSION|g" "$MANIFEST_FILE"
   $SED_INPLACE -E "s|(<release version=['\"])$CURRENT_VERSION|\1$LATEST_VERSION|g" "$METADATA_FILE"
   $SED_INPLACE -E "s|(<release date=['\"])[0-9]{4}-[0-9]{2}-[0-9]{2}|\1$CURRENT_DATE|g" "$METADATA_FILE"
-  # --- Update version number ---
+  
+  # Update the version tracker
   echo "version: $LATEST_VERSION" > version.txt
   echo "prerelease: $IS_PRERELEASE" >> version.txt
 fi
 
-# --- Compute new SHA256 ---
+# --- Compute New SHA256 ---
 DOWNLOAD_URL="$REPO_URL/$LATEST_VERSION/helium-$LATEST_VERSION-x86_64_linux.tar.xz"
-echo "   Downloading $DOWNLOAD_URL to compute sha256..."
+echo "   Downloading to compute SHA256..."
 TMP_FILE=$(mktemp)
 curl -L -s -o "$TMP_FILE" "$DOWNLOAD_URL"
 
@@ -81,23 +109,7 @@ fi
 
 echo "   New SHA256: $NEW_SHA256"
 
-# --- Replace sha256 field in manifest ---
+# --- Update SHA256 in Manifest ---
 $SED_INPLACE -E "s/sha256: [a-f0-9]+/sha256: $NEW_SHA256/" "$MANIFEST_FILE"
 
-# --- Skip if not changed ---
-if git diff --quiet -- "$MANIFEST_FILE"; then
-  echo "   No effective change detected, skipping commit."
-  exit 0
-fi
-
-# --- Update Flatpak repo ---
-rm -rf repo build-dir helium-*.flatpak
-flatpak-builder --repo=repo --force-clean build-dir com.imputnet.Helium.yml
-flatpak build-bundle repo helium-$LATEST_VERSION.flatpak com.imputnet.Helium
-
-# --- Commit and push if changed ---
-git add "$MANIFEST_FILE" "$METADATA_FILE" "helium-$LATEST_VERSION.flatpak"
-git commit -m "update: helium ${LATEST_VERSION}"
-git push origin main
-
-echo "   Changes committed and pushed: update: helium ${LATEST_VERSION}"
+echo "   Manifest updated successfully."
