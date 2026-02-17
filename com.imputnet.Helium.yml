@@ -62,7 +62,7 @@ modules:
     metadata: com.imputnet.Helium.metainfo.xml
     buildsystem: simple
     build-commands:
-      - tar -xvf helium-linux-x64.tar.gz
+      - tar -xvf helium-linux-x64.tar.gz --no-same-owner
       - mkdir -p /app/lib/helium
       - mkdir -p /app/bin
       - cp -r helium-0.9.1.1-x86_64_linux/* /app/lib/helium
