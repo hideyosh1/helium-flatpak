@@ -48,6 +48,8 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
+          # Mark directory as safe
+          git config --global --add safe.directory "$GITHUB_WORKSPACE"
           # Extract version and prerelease info
           VERSION=$(grep -m1 'version:' version.txt | awk '{print $2}')
           IS_PRERELEASE=$(grep -m1 'prerelease:' version.txt | awk '{print $2}')
