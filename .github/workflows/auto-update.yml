@@ -27,12 +27,10 @@ jobs:
           git config --global user.name "github-actions[bot]"
           git config --global user.email "41898282+github-actions[bot]@users.noreply.github.com"
 
-      - name: Install prerequisites
+      - name: Setup Flathub
         run: |
-          sudo apt update
-          sudo apt install -y flatpak flatpak-builder
-          flatpak remote-add --user --if-not-exists flathub https://flathub.org/repo/flathub.flatpakrepo   
-
+          flatpak remote-add --user --if-not-exists flathub https://dl.flathub.org/repo/flathub.flatpakrepo
+          
       - name: Run update script
         run: bash ./grab_latest.sh
 
