@@ -60,8 +60,8 @@ jobs:
         if: steps.check_changes.outputs.changes_detected == 'true'
         run: |
           VERSION=$(grep -m1 'version:' version.txt | awk '{print $2}')
-          git add com.imputnet.Helium.yml com.imputnet.Helium.metainfo.xml version.txt
-          git commit -m "Automated update to Helium $VERSION"
+          git add com.imputnet.Helium.yml com.imputnet.Helium.metainfo.xml
+          git commit -m "update: helium $VERSION"
           git push origin HEAD:main
 
       - name: Create Release
@@ -89,7 +89,7 @@ jobs:
           gh release create "v$VERSION" \
             "helium-$VERSION.flatpak" \
             --target main \
-            --title "Helium $VERSION" \
+            --title "$VERSION" \
             --notes "Automated update to Helium version $VERSION" \
             --generate-notes \
             $FLAGS
