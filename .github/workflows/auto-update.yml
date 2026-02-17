@@ -27,9 +27,8 @@ jobs:
       - name: Install prerequisites
         run: |
           sudo apt update
-          sudo apt install flatpak
-          sudo apt install flatpak-builder
-          flatpak remote-add --if-not-exists flathub https://flathub.org/repo/flathub.flatpakrepo   
+          sudo apt install -y flatpak flatpak-builder
+          flatpak remote-add --user --if-not-exists flathub https://flathub.org/repo/flathub.flatpakrepo   
 
       - name: Run update script
         run: bash ./grab_latest.sh
