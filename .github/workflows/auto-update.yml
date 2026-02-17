@@ -34,53 +34,61 @@ jobs:
       - name: Run update script
         run: bash ./grab_latest.sh
 
-      - name: Check if version was updated
-        id: check_diff
+      - name: Check for changes
+        id: check_changes
         run: |
-          if git diff --quiet HEAD~1 HEAD -- com.imputnet.Helium.yml; then
-            echo "changed=false" >> "$GITHUB_OUTPUT"
+          if [[ -n $(git status -s com.imputnet.Helium.yml) ]]; then
+            echo "changes_detected=true" >> "$GITHUB_OUTPUT"
           else
-            echo "changed=true" >> "$GITHUB_OUTPUT"
+            echo "changes_detected=false" >> "$GITHUB_OUTPUT"
           fi
 
-      - name: Create new tag and release
-        if: steps.check_diff.outputs.changed == 'true'
+      - name: Build Flatpak
+        if: steps.check_changes.outputs.changes_detected == 'true'
+        run: |
+          # Load version
+          VERSION=$(grep -m1 'version:' version.txt | awk '{print $2}')
+          
+          # Build
+          flatpak-builder --user --repo=repo --force-clean --install-deps-from=flathub build-dir com.imputnet.Helium.yml
+          
+          # Bundle into a single file
+          flatpak build-bundle repo "helium-$VERSION.flatpak" com.imputnet.Helium
+
+      - name: Commit and Push
+        if: steps.check_changes.outputs.changes_detected == 'true'
+        run: |
+          VERSION=$(grep -m1 'version:' version.txt | awk '{print $2}')
+          git add com.imputnet.Helium.yml com.imputnet.Helium.metainfo.xml version.txt
+          git commit -m "Automated update to Helium $VERSION"
+          git push origin HEAD:main
+
+      - name: Create Release
+        if: steps.check_changes.outputs.changes_detected == 'true'
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          # Install gh CLI
+          # --- Install GH CLI ---
           curl -s https://api.github.com/repos/cli/cli/releases/latest \
             | python3 -c "import sys, json; print([a['browser_download_url'] for a in json.load(sys.stdin)['assets'] if 'linux_amd64.tar.gz' in a['name']][0])" \
             | xargs curl -L -o gh.tar.gz
           tar -xzf gh.tar.gz
           install -Dm755 gh_*_linux_amd64/bin/gh $HOME/.local/bin/gh
-          rm -rf gh.tar.gz gh_*_linux_amd64
           export PATH=$HOME/.local/bin:$PATH
 
-          # Mark workspace safe
-          git config --global --add safe.directory "$GITHUB_WORKSPACE"
-
-          # Release logic
+          # --- Release Logic ---
           VERSION=$(grep -m1 'version:' version.txt | awk '{print $2}')
           IS_PRERELEASE=$(grep -m1 'prerelease:' version.txt | awk '{print $2}')
           
-          echo "Processing v$VERSION..."
-
-          # Check if Release already exists
-          if gh release view "v$VERSION" >/dev/null 2>&1; then
-            echo "Release v$VERSION already exists on GitHub. Skipping."
-            exit 0
-          fi
-
-          # Create Release
           FLAGS=""
           if [[ "$IS_PRERELEASE" == "true" ]]; then
             FLAGS="--prerelease"
           fi
 
           gh release create "v$VERSION" \
+            "helium-$VERSION.flatpak" \
             --target main \
-            --title "$VERSION" \
+            --title "Helium $VERSION" \
             --notes "Automated update to Helium version $VERSION" \
             --generate-notes \
             $FLAGS
