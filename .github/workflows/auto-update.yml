@@ -30,6 +30,13 @@ jobs:
       - name: Setup Flathub
         run: |
           flatpak remote-add --user --if-not-exists flathub https://dl.flathub.org/repo/flathub.flatpakrepo
+
+      - name: Install jq
+        run: |
+          mkdir -p $HOME/.local/bin
+          wget -O $HOME/.local/bin/jq https://github.com/jqlang/jq/releases/download/jq-1.8.1/jq-linux64
+          chmod +x $HOME/.local/bin/jq
+          echo "$HOME/.local/bin" >> $GITHUB_PATH
           
       - name: Run update script
         run: bash ./grab_latest.sh
