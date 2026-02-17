@@ -26,7 +26,7 @@ The easiest way to install Helium is using the standalone bundle. This bypasses 
 If you want to build the package yourself or contribute to the manifest, follow these steps.
 
 ### Prerequisites
-Ensure you have `flatpak` and `flatpak-builder` installed. You also need the Flathub repository enabled to download the Freedesktop SDK/Runtime (version 25.08).
+Ensure you have `flatpak` and `flatpak-builder` installed. You also need the Flathub repository enabled to download the Freedesktop SDK/Runtime (version 24.08).
 
 ```bash
 flatpak remote-add --user --if-not-exists flathub https://dl.flathub.org/repo/flathub.flatpakrepo
