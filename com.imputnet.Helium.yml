@@ -59,7 +59,7 @@ finish-args:
 
 modules:
   - name: helium
-    metadata: com.imputnet.Helium.xml
+    metadata: com.imputnet.Helium.metainfo.xml
     buildsystem: simple
     build-commands:
       - tar -xvf helium-linux-x64.tar.gz

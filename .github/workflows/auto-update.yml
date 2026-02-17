@@ -13,6 +13,9 @@ permissions:
 jobs:
   update-helium:
     runs-on: ubuntu-latest
+    container:
+      image: bilelmoussaoui/flatpak-github-actions:freedesktop-25.08
+      options: --privileged
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
