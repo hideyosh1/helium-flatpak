@@ -48,6 +48,17 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
+          # Install gh CLI
+          echo "Fetching latest GitHub CLI..."
+          GH_DL_URL=$(curl -s https://api.github.com/repos/cli/cli/releases/latest | python3 -c "import sys, json; print([a['browser_download_url'] for a in json.load(sys.stdin)['assets'] if 'linux_amd64.tar.gz' in a['name']][0])")
+          echo "Downloading: $GH_DL_URL"
+          curl -L -o gh.tar.gz "$GH_DL_URL"
+          tar -xzf gh.tar.gz
+          install -Dm755 gh_*_linux_amd64/bin/gh $HOME/.local/bin/gh
+          rm -rf gh.tar.gz gh_*_linux_amd64
+          export PATH=$HOME/.local/bin:$PATH
+          gh --version
+          
           # Mark directory as safe
           git config --global --add safe.directory "$GITHUB_WORKSPACE"
           # Extract version and prerelease info
