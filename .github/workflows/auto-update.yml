@@ -49,9 +49,6 @@ jobs:
         arch: [x86_64, aarch64]
     # Use native ARM runners for aarch64, standard runners for x86_64
     runs-on: ${{ matrix.arch == 'aarch64' && 'ubuntu-24.04-arm' || 'ubuntu-latest' }}
-    container:
-      image: bilelmoussaoui/flatpak-github-actions:freedesktop-24.08
-      options: --privileged
     steps:
       - uses: actions/checkout@v4
         with:
@@ -59,6 +56,11 @@ jobs:
 
       - name: Mark safe directory
         run: git config --global --add safe.directory "$GITHUB_WORKSPACE"
+
+      - name: Install Flatpak Builder
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y flatpak flatpak-builder
 
       - name: Setup Flathub
         run: flatpak remote-add --user --if-not-exists flathub https://dl.flathub.org/repo/flathub.flatpakrepo
