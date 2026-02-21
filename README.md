@@ -14,7 +14,7 @@ The easiest way to install Helium is using the standalone bundle. This bypasses 
 2.  **Install** it via the command line:
 
     ```bash
-    flatpak install helium-[VERSION].flatpak
+    flatpak install helium-[ARCH]-[VERSION].flatpak
     ```
 
     *Note: On some distributions, you can simply double-click the downloaded file to install it via your Software Center.*
@@ -36,8 +36,16 @@ flatpak install org.freedesktop.Sdk/x86_64/24.08
 ### Build & Install
 Run the following command in the root of this repository. This will download the binary, build the sandbox, and install it to your user directory.
 
+For x86_64 systems:
+
 ```bash
-flatpak-builder --user --install --force-clean build-dir net.imput.helium.yml
+flatpak-builder --arch=x86_64 --user --install --force-clean build-dir net.imput.helium.yml
+```
+
+For ARM64 systems:
+
+```bash
+flatpak-builder --arch=aarch64 --user --install --force-clean build-dir net.imput.helium.yml
 ```
 
 ---
