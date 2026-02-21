@@ -43,7 +43,7 @@ jobs:
       - name: Build Flatpak
         if: github.event_name == 'workflow_dispatch' || steps.check_commits.outputs.recent_commit == 'true'
         run: |
-          flatpak-builder --repo=repo build-dir com.imputnet.Helium.yml
+          flatpak-builder --repo=repo build-dir net.imput.helium.yml
 
       - name: Upload repo to gh-pages
         if: github.event_name == 'workflow_dispatch' || steps.check_commits.outputs.recent_commit == 'true'
