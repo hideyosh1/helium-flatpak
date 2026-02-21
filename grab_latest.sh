@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-MANIFEST_FILE="com.imputnet.Helium.yml"
-METADATA_FILE="com.imputnet.Helium.metainfo.xml"
+MANIFEST_FILE="net.imput.helium.yml"
+METADATA_FILE="net.imput.helium.metainfo.xml"
 REPO_URL="https://github.com/imputnet/helium-linux/releases/download"
 
 # Read config or default to false

@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <component type="desktop">
-  <id>com.imputnet.Helium</id>
+  <id>net.imput.helium</id>
   <metadata_license>CC0-1.0</metadata_license>
   <project_license>BSD-3-Clause</project_license>
 
@@ -27,7 +27,7 @@
   <url type="bugtracker">https://github.com/imputnet/helium/issues</url>
   <url type="help">https://github.com/imputnet/helium</url>
 
-  <launchable type="desktop-id">com.imputnet.Helium.desktop</launchable>
+  <launchable type="desktop-id">net.imput.helium.desktop</launchable>
 
   <screenshots>
     <screenshot type="default">

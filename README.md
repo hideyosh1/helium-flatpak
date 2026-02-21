@@ -17,7 +17,7 @@ The easiest way to install Helium is using the standalone bundle. This bypasses 
     flatpak install helium-[VERSION].flatpak
     ```
 
-    *Note: On many distributions (like Fedora Silverblue, SteamOS, or Ubuntu), you can simply double-click the downloaded file to install it via your Software Center.*
+    *Note: On some distributions, you can simply double-click the downloaded file to install it via your Software Center.*
 
 ---
 
@@ -30,13 +30,14 @@ Ensure you have `flatpak` and `flatpak-builder` installed. You also need the Fla
 
 ```bash
 flatpak remote-add --user --if-not-exists flathub https://dl.flathub.org/repo/flathub.flatpakrepo
+flatpak install org.freedesktop.Sdk/x86_64/24.08
 ```
 
 ### Build & Install
 Run the following command in the root of this repository. This will download the binary, build the sandbox, and install it to your user directory.
 
 ```bash
-flatpak-builder --user --install --force-clean build-dir com.imputnet.Helium.yml
+flatpak-builder --user --install --force-clean build-dir net.imput.helium.yml
 ```
 
 ---
@@ -46,7 +47,7 @@ flatpak-builder --user --install --force-clean build-dir com.imputnet.Helium.yml
 Once installed (via bundle or local build), you can launch Helium from your application menu or via the terminal:
 
 ```bash
-flatpak run com.imputnet.Helium
+flatpak run net.imput.helium
 ```
 
 ---
@@ -56,9 +57,9 @@ flatpak run com.imputnet.Helium
 To remove Helium and its data:
 
 ```bash
-flatpak uninstall com.imputnet.Helium
+flatpak uninstall net.imput.helium
 # Optional: Remove app data
-rm -rf ~/.var/app/com.imputnet.Helium
+rm -rf ~/.var/app/net.imput.helium
 ```
 
 ---

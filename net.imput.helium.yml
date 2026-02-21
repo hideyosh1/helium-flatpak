@@ -1,4 +1,4 @@
-app-id: com.imputnet.Helium
+app-id: net.imput.helium
 runtime: org.freedesktop.Platform
 runtime-version: "24.08"
 sdk: org.freedesktop.Sdk
@@ -56,10 +56,12 @@ finish-args:
   - --env=GSETTINGS_BACKEND=dconf
   # KDE-specific
   - --filesystem=~/.config/kioslaverc
+  # Distribution EnvVar
+  - --env=CHROME_VERSION_EXTRA="Flatpak"
 
 modules:
   - name: helium
-    metadata: com.imputnet.Helium.metainfo.xml
+    metadata: net.imput.helium.metainfo.xml
     buildsystem: simple
     build-commands:
       - tar -xvf helium-linux-x64.tar.gz --no-same-owner
@@ -72,20 +74,20 @@ modules:
       - echo 'exec /app/lib/helium/helium.real --no-sandbox --test-type "$@"' >> /app/bin/helium
       - chmod +x /app/bin/helium
 
-      - install -Dm644 com.imputnet.Helium.desktop /app/share/applications/com.imputnet.Helium.desktop
+      - install -Dm644 net.imput.helium.desktop /app/share/applications/net.imput.helium.desktop
 
       - mkdir -p icons/512x512 icons/256x256 icons/128x128 icons/64x64 icons/32x32
-      - cp com.imputnet.Helium.png icons/512x512/
-      - cp com.imputnet.Helium.png icons/256x256/
-      - cp com.imputnet.Helium.png icons/128x128/
-      - cp com.imputnet.Helium.png icons/64x64/
-      - cp com.imputnet.Helium.png icons/32x32/
+      - cp net.imput.helium.png icons/512x512/
+      - cp net.imput.helium.png icons/256x256/
+      - cp net.imput.helium.png icons/128x128/
+      - cp net.imput.helium.png icons/64x64/
+      - cp net.imput.helium.png icons/32x32/
 
-      - install -Dm644 icons/512x512/com.imputnet.Helium.png /app/share/icons/hicolor/512x512/apps/com.imputnet.Helium.png  
-      - install -Dm644 icons/256x256/com.imputnet.Helium.png /app/share/icons/hicolor/256x256/apps/com.imputnet.Helium.png
-      - install -Dm644 icons/128x128/com.imputnet.Helium.png /app/share/icons/hicolor/128x128/apps/com.imputnet.Helium.png
-      - install -Dm644 icons/64x64/com.imputnet.Helium.png /app/share/icons/hicolor/64x64/apps/com.imputnet.Helium.png
-      - install -Dm644 icons/32x32/com.imputnet.Helium.png /app/share/icons/hicolor/32x32/apps/com.imputnet.Helium.png
+      - install -Dm644 icons/512x512/net.imput.helium.png /app/share/icons/hicolor/512x512/apps/net.imput.helium.png  
+      - install -Dm644 icons/256x256/net.imput.helium.png /app/share/icons/hicolor/256x256/apps/net.imput.helium.png
+      - install -Dm644 icons/128x128/net.imput.helium.png /app/share/icons/hicolor/128x128/apps/net.imput.helium.png
+      - install -Dm644 icons/64x64/net.imput.helium.png /app/share/icons/hicolor/64x64/apps/net.imput.helium.png
+      - install -Dm644 icons/32x32/net.imput.helium.png /app/share/icons/hicolor/32x32/apps/net.imput.helium.png
 
     sources:
       - type: file
@@ -93,17 +95,17 @@ modules:
         sha256: e1ceed22b6bb4ab88141ede28b86cb1535757212cf41235d39635447a7717cfd
         dest-filename: helium-linux-x64.tar.gz
       - type: file
-        path: com.imputnet.Helium.metainfo.xml
+        path: net.imput.helium.metainfo.xml
       - type: file
-        path: com.imputnet.Helium.desktop
+        path: net.imput.helium.desktop
 
       - type: file
-        path: icons/32x32/com.imputnet.Helium.png
+        path: icons/32x32/net.imput.helium.png
       - type: file
-        path: icons/64x64/com.imputnet.Helium.png
+        path: icons/64x64/net.imput.helium.png
       - type: file
-        path: icons/128x128/com.imputnet.Helium.png
+        path: icons/128x128/net.imput.helium.png
       - type: file
-        path: icons/256x256/com.imputnet.Helium.png
+        path: icons/256x256/net.imput.helium.png
       - type: file
-        path: icons/512x512/com.imputnet.Helium.png
+        path: icons/512x512/net.imput.helium.png
