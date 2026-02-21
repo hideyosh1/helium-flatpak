@@ -11,83 +11,105 @@ permissions:
   contents: write
 
 jobs:
-  update-helium:
+  # 1. Update the Manifest File
+  update-manifest:
     runs-on: ubuntu-latest
-    container:
-      image: bilelmoussaoui/flatpak-github-actions:freedesktop-24.08
-      options: --privileged
+    outputs:
+      changes_detected: ${{ steps.check.outputs.changes_detected }}
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Set up Git
-        run: |
-          git config --global --add safe.directory "$GITHUB_WORKSPACE"
-          git config --global user.name "github-actions[bot]"
-          git config --global user.email "41898282+github-actions[bot]@users.noreply.github.com"
-
-      - name: Setup Flathub
-        run: |
-          flatpak remote-add --user --if-not-exists flathub https://dl.flathub.org/repo/flathub.flatpakrepo
           
       - name: Run update script
         run: bash ./grab_latest.sh
-
-      - name: Check for changes
-        id: check_changes
+        
+      - name: Check and Commit
+        id: check
         run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          
           if [[ -n $(git status -s net.imput.helium.yml) ]]; then
             echo "changes_detected=true" >> "$GITHUB_OUTPUT"
+            VERSION=$(grep -m1 'version:' version.txt | awk '{print $2}')
+            git add net.imput.helium.yml net.imput.helium.metainfo.xml version.txt
+            git commit -m "update: helium $VERSION"
+            git push origin HEAD:main
           else
             echo "changes_detected=false" >> "$GITHUB_OUTPUT"
           fi
 
-      - name: Build Flatpak
-        if: steps.check_changes.outputs.changes_detected == 'true'
-        run: |
-          # Load version
-          VERSION=$(grep -m1 'version:' version.txt | awk '{print $2}')
-          
-          # Build
-          flatpak-builder --user --repo=repo --force-clean --install-deps-from=flathub build-dir net.imput.helium.yml
-          
-          # Bundle into a single file
-          flatpak build-bundle repo "helium-$VERSION.flatpak" net.imput.helium
+  # 2. Build the Flatpaks
+  build-flatpak:
+    needs: update-manifest
+    if: needs.update-manifest.outputs.changes_detected == 'true'
+    strategy:
+      matrix:
+        arch: [x86_64, aarch64]
+    # Use native ARM runners for aarch64, standard runners for x86_64
+    runs-on: ${{ matrix.arch == 'aarch64' && 'ubuntu-24.04-arm' || 'ubuntu-latest' }}
+    container:
+      image: bilelmoussaoui/flatpak-github-actions:freedesktop-24.08
+      options: --privileged
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
 
-      - name: Commit and Push
-        if: steps.check_changes.outputs.changes_detected == 'true'
+      - name: Mark safe directory
+        run: git config --global --add safe.directory "$GITHUB_WORKSPACE"
+
+      - name: Setup Flathub
+        run: flatpak remote-add --user --if-not-exists flathub https://dl.flathub.org/repo/flathub.flatpakrepo
+
+      - name: Build and Bundle
         run: |
           VERSION=$(grep -m1 'version:' version.txt | awk '{print $2}')
-          git add net.imput.helium.yml net.imput.helium.metainfo.xml
-          git commit -m "update: helium $VERSION"
-          git push origin HEAD:main
+          flatpak-builder --arch=${{ matrix.arch }} --user --repo=repo --force-clean --install-deps-from=flathub build-dir net.imput.helium.yml
+          flatpak build-bundle --arch=${{ matrix.arch }} repo "helium-${VERSION}-${{ matrix.arch }}.flatpak" net.imput.helium
 
-      - name: Create Release
-        if: steps.check_changes.outputs.changes_detected == 'true'
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Upload Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: flatpak-${{ matrix.arch }}
+          path: "*.flatpak"
+
+  # 3. Create the Release
+  release:
+    needs: [update-manifest, build-flatpak]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+
+      - name: Download Artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: artifacts
+          merge-multiple: true
+
+      - name: Install GH CLI
         run: |
-          # --- Install GH CLI ---
           curl -s https://api.github.com/repos/cli/cli/releases/latest \
             | python3 -c "import sys, json; print([a['browser_download_url'] for a in json.load(sys.stdin)['assets'] if 'linux_amd64.tar.gz' in a['name']][0])" \
             | xargs curl -L -o gh.tar.gz
           tar -xzf gh.tar.gz
-          install -Dm755 gh_*_linux_amd64/bin/gh $HOME/.local/bin/gh
-          export PATH=$HOME/.local/bin:$PATH
+          sudo install -Dm755 gh_*_linux_amd64/bin/gh /usr/local/bin/gh
 
-          # --- Release Logic ---
+      - name: Create Release
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
           VERSION=$(grep -m1 'version:' version.txt | awk '{print $2}')
           IS_PRERELEASE=$(grep -m1 'prerelease:' version.txt | awk '{print $2}')
-          
           FLAGS=""
-          if [[ "$IS_PRERELEASE" == "true" ]]; then
-            FLAGS="--prerelease"
-          fi
-
-          gh release create "v$VERSION" \
-            "helium-$VERSION.flatpak" \
+          if [[ "$IS_PRERELEASE" == "true" ]]; then FLAGS="--prerelease"; fi
+          
+          # Upload all downloaded flatpak artifacts
+          gh release create "$VERSION" \
+            artifacts/*.flatpak \
             --target main \
             --title "$VERSION" \
             --notes "Automated update to Helium version $VERSION" \

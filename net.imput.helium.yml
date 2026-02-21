@@ -3,6 +3,7 @@ runtime: org.freedesktop.Platform
 runtime-version: "24.08"
 sdk: org.freedesktop.Sdk
 command: helium
+supported-arches: [x86_64, aarch64]
 
 x-annotations:
   org.flatpak.metadata.name: "Helium"
@@ -64,11 +65,13 @@ modules:
     metadata: net.imput.helium.metainfo.xml
     buildsystem: simple
     build-commands:
-      - tar -xvf helium-linux-x64.tar.gz --no-same-owner
       - mkdir -p /app/lib/helium
       - mkdir -p /app/bin
-      - cp -r helium-0.9.3.1-x86_64_linux/* /app/lib/helium
-      - install -Dm755 helium-0.9.3.1-x86_64_linux/helium /app/lib/helium/helium.real
+      
+      - tar -xvf helium-linux.tar.xz -C /app/lib/helium --strip-components=1 --no-same-owner
+      
+      - mv /app/lib/helium/helium /app/lib/helium/helium.real
+      - chmod +x /app/lib/helium/helium.real
 
       - echo '#!/bin/sh' > /app/bin/helium
       - echo 'exec /app/lib/helium/helium.real --no-sandbox --test-type "$@"' >> /app/bin/helium
@@ -77,11 +80,11 @@ modules:
       - install -Dm644 net.imput.helium.desktop /app/share/applications/net.imput.helium.desktop
 
       - mkdir -p icons/512x512 icons/256x256 icons/128x128 icons/64x64 icons/32x32
-      - cp net.imput.helium.png icons/512x512/
-      - cp net.imput.helium.png icons/256x256/
-      - cp net.imput.helium.png icons/128x128/
-      - cp net.imput.helium.png icons/64x64/
-      - cp net.imput.helium.png icons/32x32/
+      - cp net.imput.helium.png icons/512x512/ || true
+      - cp net.imput.helium.png icons/256x256/ || true
+      - cp net.imput.helium.png icons/128x128/ || true
+      - cp net.imput.helium.png icons/64x64/ || true
+      - cp net.imput.helium.png icons/32x32/ || true
 
       - install -Dm644 icons/512x512/net.imput.helium.png /app/share/icons/hicolor/512x512/apps/net.imput.helium.png  
       - install -Dm644 icons/256x256/net.imput.helium.png /app/share/icons/hicolor/256x256/apps/net.imput.helium.png
@@ -91,14 +94,20 @@ modules:
 
     sources:
       - type: file
+        only-arches: [x86_64]
         url: https://github.com/imputnet/helium-linux/releases/download/0.9.3.1/helium-0.9.3.1-x86_64_linux.tar.xz
         sha256: e1ceed22b6bb4ab88141ede28b86cb1535757212cf41235d39635447a7717cfd
-        dest-filename: helium-linux-x64.tar.gz
+        dest-filename: helium-linux.tar.xz
+      - type: file
+        only-arches: [aarch64]
+        url: https://github.com/imputnet/helium-linux/releases/download/0.9.3.1/helium-0.9.3.1-arm64_linux.tar.xz
+        sha256: 7a3a8ae9bfecdeb10da36f6ad62be940372e6985ab4a3549a7c1fc898d209fef
+        dest-filename: helium-linux.tar.xz
+        
       - type: file
         path: net.imput.helium.metainfo.xml
       - type: file
         path: net.imput.helium.desktop
-
       - type: file
         path: icons/32x32/net.imput.helium.png
       - type: file
