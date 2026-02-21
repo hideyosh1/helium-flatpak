@@ -14,7 +14,7 @@ The easiest way to install Helium is using the standalone bundle. This bypasses 
 2.  **Install** it via the command line:
 
     ```bash
-    flatpak install helium-[ARCH]-[VERSION].flatpak
+    flatpak install helium-[VERSION]-[ARCH].flatpak
     ```
 
     *Note: On some distributions, you can simply double-click the downloaded file to install it via your Software Center.*
