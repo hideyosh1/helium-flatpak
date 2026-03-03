@@ -17,7 +17,7 @@ The easiest way to install Helium is using the standalone bundle. This bypasses 
     flatpak install helium-[VERSION]-[ARCH].flatpak
     ```
 
-    *Note: On some distributions, you can simply double-click the downloaded file to install it via your Software Center.*
+    *Note: on some distributions, you can simply double-click the downloaded file to install it via your Software Center.*
 
 ---
 
@@ -47,6 +47,8 @@ For ARM64 systems:
 ```bash
 flatpak-builder --arch=aarch64 --user --install --force-clean build-dir net.imput.helium.yml
 ```
+
+*Note: to install for all users, use sudo and replace '--user' with '--system'.*
 
 ---
 
