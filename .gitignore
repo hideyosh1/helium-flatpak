@@ -1,2 +1,5 @@
-build-dir/
+.flatpak-builder/
 repo/
+helium.flatpak
+.direnv
+flake.lock
